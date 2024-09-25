@@ -73,3 +73,18 @@ def  LoginView(request):
             messages.error(request, "Invalid login credentials")
             return redirect('login')
     return render(request, 'login.html')
+
+
+def LogoutView(request):
+    logout(request)
+    return redirect('login')
+
+
+def ForgotPassword(request):
+    return render(request, 'forgot_password.html')
+
+def PasswordresetSent(request, reset_id):
+    return render(request, 'password_reset_sent.html')
+
+def ResetPassword(request):
+    return render(request, 'reset_password.html')
