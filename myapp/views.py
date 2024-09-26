@@ -81,10 +81,26 @@ def LogoutView(request):
 
 
 def ForgotPassword(request):
+
+    if request.method == "POST":
+        email = request.POST.get('email')
+
+        try:
+            user = User.objects.get(email=email)
+
+            new_password_reset = PasswordReset(user=user)
+            new_password_reset.save()
+            
+        except User.DoesNotExist:
+            messages.error(request, f"No user with such email '{email}' found")
+            return redirect('forgot-password')
+        
     return render(request, 'forgot_password.html')
+
 
 def PasswordresetSent(request, reset_id):
     return render(request, 'password_reset_sent.html')
+
 
 def ResetPassword(request):
     return render(request, 'reset_password.html')
