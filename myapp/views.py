@@ -90,7 +90,23 @@ def ForgotPassword(request):
 
             new_password_reset = PasswordReset(user=user)
             new_password_reset.save()
-            
+
+            password_reset_url = reverse('reset_password', kwargs={'reset_id': new_password_reset.reset_id})
+            full_password_reset_url = f'{request.get_scheme()}://{request.get_host()}{password_reset_url}'
+            email_body = f'Reset your password in the link below:\n\n\n{password_reset_url}',
+        
+            email_message = EmailMessage(
+                'Reset your password',
+                email_body,
+                settings.EMAIL_HOST_USER,
+                [email]
+            )
+
+            email_message.fail_silently = True
+            email_message.send()
+
+            return redirect('password_reset_sent', reset_id=new_password_reset.reset_id)
+
         except User.DoesNotExist:
             messages.error(request, f"No user with such email '{email}' found")
             return redirect('forgot-password')
@@ -99,8 +115,59 @@ def ForgotPassword(request):
 
 
 def PasswordresetSent(request, reset_id):
-    return render(request, 'password_reset_sent.html')
+
+    if PasswordReset.objects.filter(reset_id=reset_id).exists():
+        return render(request, 'password_reset_sent.html')
+    else:
+        messages.error(request, 'Invalid reset id')
+        return redirect('forgot_password')
+    
+ 
+
+def ResetPassword(request, reset_id):
+
+    try:
+        password_reset_id = PasswordReset.objects.get(reset_id=reset_id)
+
+        if request.method == "POST":
+            password = request.POST.get('password')
+            confirm_password = request.POST.get('confirm_password')
+
+            passwords_have_error = False
+
+            if password != confirm_password:
+                passwords_have_error = True
+                messages.error(request, 'Passwors do not macth')
+
+            if len(password) < 5:
+                passwords_have_error = True
+                messages.error(request, "Password must be atleast 5 characters long")
+
+            expiration_time = password_reset_id.created_when + timezone.timedelta(minutes=10)
+
+            if timezone.now() > expiration_time:
+                passwords_have_error = True
+                messages.error(request, 'Reset link has expired')
+
+                reset_id.delete()
+
+            if not passwords_have_error:
+                user = password_reset_id.user
+                user.set_password(password)
+                user.save()
+
+                reset_id.delete()
+
+                messages.success(request, 'Password reset. Proceed to login')
+                return redirect('login')
+            
+            else:
+                return redirect('reset_password', reset_id=reset_id)
 
 
-def ResetPassword(request):
+    except PasswordReset.DoesNotExist:
+
+        messages.error(request, 'invalid reset id')
+        return redirect('forget_password')
+    
     return render(request, 'reset_password.html')

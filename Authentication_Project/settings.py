@@ -133,4 +133,4 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
 EMAIL_HOST_USER = "bett6448@gmail.com"
-EMAIL_HOST_PASSWORD = "fpbw anvv vurp ohyq "
+EMAIL_HOST_PASSWORD = "jmgz qxmc ezkk harc "
