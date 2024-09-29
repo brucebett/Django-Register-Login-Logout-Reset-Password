@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- Coding By CodingNepal - youtube.com/codingnepal -->
 <html lang="en" dir="ltr">
   <head>
     {% load static %}
@@ -21,7 +20,7 @@
           {% endfor %}
       {% endif %}
         
-      <form method="POST ">
+      <form method="POST">
 
         {% csrf_token %}
       
@@ -55,7 +54,7 @@
           <label>Password</label>
         </div>    
 
-        <!-- <div class="pass">Forgot Password?</div> -->
+        <div class="pass">Forgot Password?</div>
         <input type="submit" value="Register">
         <div class="signup_link">
           Already have an account? <a href="{% url 'login' %}">Login</a>
